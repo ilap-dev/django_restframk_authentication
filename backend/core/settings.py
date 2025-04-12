@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 import environ
 from pathlib import Path
-
+from datetime import timedelta
 
 from tutorial.settings import INSTALLED_APPS
 
@@ -45,11 +45,16 @@ DJANGO_APPS = [
     'django.contrib.staticfiles',
 ]
 
-PROJECT_APPS = []
+PROJECT_APPS = [
+    'apps.authentication',
+]
 
 THIRD_PARTY_APPS=[
     'rest_framework',
-    'channels'
+    'channels',
+    'djoser',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
@@ -103,6 +108,13 @@ DATABASES = {
     }
 }
 
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -151,8 +163,34 @@ REST_FRAMEWORK = {
     #Sino solo puede hacer uso de los get
     "DEFAULT_PERMISSION_CLASSES":[
         "rest_framework.permissions.IsAuthenticatedOrReadOnly"
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES":[
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
     ]
 }
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES":("JWT",),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_TOKEN_CLASSES":("rest_framework_simplejwt.tokens.AccessToken",),
+    "SIGNING_KEY": env("SECRET_KEY"),
+}
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {},
+}
+
 #se usa uvicorn y channels para usar asgi, y nuestra aplicacion sea mas rapida
 CHANNELS_LAYERS = {
     "default":{
