@@ -17,7 +17,7 @@ services:
     image: redis
     container_name: authentication_django_redis
     ports:
-      - 6379:6380
+      - 1081:1081
 
   #Database authentication
   authentication_django_db:

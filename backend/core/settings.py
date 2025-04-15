@@ -173,6 +173,9 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
+AUTH_USER_MODEL = "authentication.UserAccount"
+
+
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES":("JWT",),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
