@@ -75,7 +75,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,"templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -187,11 +187,29 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
-    'SERIALIZERS': {},
+    'LOGIN_FIELD':'email',
+    'SER_CREATE_PASSWORD_RETYPE':True,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION':True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
+    'SEND_CONFIRMATION_EMAIL':True,
+    'SEND_ACTIVATION_EMAIL':True,
+    'PASSWORD_RESET_CONFIRM_URL': 'email/password_reset_confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': 'email/username_reset_confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'email/activate/{uid}/{token}',
+    'SERIALIZERS': {
+        'user_create':'apps.authentication.serializers.UserCreateSerializer',
+        'user':'apps.authentication.serializers.UserSerializer',
+        'current_user':'apps.authentication.serializers.UserSerializer',
+        'user_delete':'djoser.serializers.UserDeleteSerializer'
+    },
+    'TEMPLATES':{
+        'activation':'email/auth/activation.html',
+        'confirmation':'email/auth/confirmation.html',
+        'password_changed_confirmation':'email/auth/password_changed_confirmation.html',
+        'password_reset': 'email/auth/password_reset.html',
+        'username_changed_confirmation': 'email/auth/username_changed_confirmation.html',
+        'username_reset': 'email/auth/username_reset.html',
+    }
 }
 
 #se usa uvicorn y channels para usar asgi, y nuestra aplicacion sea mas rapida
