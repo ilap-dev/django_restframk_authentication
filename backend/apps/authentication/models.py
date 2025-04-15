@@ -7,7 +7,6 @@ from django.contrib.auth.models import (
     BaseUserManager
 )
 # Create your models here.
-from djoser.signals import user_registered, user_activated
 
 class UserAccountManager(BaseUserManager):
     RESTRICTED_USERNAMES = ["admin","undefined","null","superuser", "root", "system"]
@@ -44,7 +43,6 @@ class UserAccountManager(BaseUserManager):
         user.is_staff = True
         user.is_active = True
         user.save(using=self._db)
-        user.save()
         return user
 
 
@@ -67,12 +65,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-def post_user_registered(user, *args, **kwargs):
-    print("User has registered.")
 
-def post_user_activated(user, *args, **kwargs):
-    print("User has activated")
 
-user_registered.connect(post_user_registered)
-user_activated.connect(post_user_activated)
+
 
