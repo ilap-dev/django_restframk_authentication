@@ -68,6 +68,8 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     login_otp_used = models.BooleanField(default=False)
     otp_created_at = models.DateTimeField(blank=True, null=True)
 
+    login_ip = models.CharField(max_length=225, blank=True, null=True)
+
     objects = UserAccountManager() #Describe el administrador del modelo
 
     USERNAME_FIELD = "email"

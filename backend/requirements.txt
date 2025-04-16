@@ -21,3 +21,4 @@ cryptography==41.0.7
 rsa==4.9
 pyotp==2.9.0
 qrcode==8.0
+django-axes==7.0.0

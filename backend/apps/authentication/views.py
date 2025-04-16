@@ -1,7 +1,8 @@
 from django.shortcuts import render
 # Create your views here.
 from rest_framework_api.views import StandardAPIView
-from rest_framework import permissions
+from rest_framework import permissions, status
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.utils.crypto import get_random_string
@@ -23,7 +24,7 @@ class GenerateQRCodeView(StandardAPIView):
         user = request.user
         email = user.email
         otp_base32 = pyotp.random_base32()
-        otp_auth_url = pyotp.totp.TOTP(otp_base32).provisioning_url(
+        otp_auth_url = pyotp.totp.TOTP(otp_base32).provisioning_uri(
             name=email.lower(), issuer_name="Django_Auth"
         )
 
@@ -133,3 +134,30 @@ class Set2FAView(StandardAPIView):
             user.two_factor_enabled = False
             user.save()
             return self.response("2FA Disabled")
+
+
+
+class OTPLoginView(StandardAPIView):
+    permission_classes = [HasValidAPIKey]
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        otp_code = request.data.get('otp')
+        if not email or not otp_code:
+            return self.error("Both email and OTP code are required.")
+
+        try:
+            user = User.objects.get(email=email)
+            totp = pyotp.TOTP(user.otp_base32)
+            if not totp.verify(otp_code):
+                return self.error("Invalid OTP Code.")
+
+            user.login_otp_used = True
+            user.save()
+
+            refresh = RefreshToken.for_user(user)
+            return self.response({
+                "access":str(refresh.access_token),
+                "refresh":str(refresh)
+            })
+        except User.DoesNotExist:
+            return self.response("User does not exist", status=status.HTTP_404_NOT_FOUND)
