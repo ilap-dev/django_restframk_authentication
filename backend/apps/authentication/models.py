@@ -1,4 +1,6 @@
 import uuid
+from email.policy import default
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import (
@@ -57,12 +59,27 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     update_at = models.DateTimeField(auto_now=True)
+
+    two_factor_enabled = models.BooleanField(default=False)
+    otpauth_url= models.CharField(max_length=225, blank=True, null=True)
+    otp_base32= models.CharField(max_length=225, null=True)
+    qr_code= models.ImageField(upload_to="qrcode/", blank=True, null=True)
+    login_otp=models.CharField(max_length=225, blank=True, null=True)
+    login_otp_used = models.BooleanField(default=False)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
+
     objects = UserAccountManager() #Describe el administrador del modelo
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username","first_name","last_name"]
 
     def __str__(self):
         return self.email
+
+    def get_qr_code(self):
+        if self.qr_code and hasattr(self.qr_code, "url"):
+            return self.qr_code.url
+        return None
 
 
 
